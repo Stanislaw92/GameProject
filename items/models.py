@@ -14,6 +14,15 @@ class item_prefix(models.Model):
         default='0.png', upload_to='prefix_pics', blank=True)
     name = models.TextField(max_length=20, blank=False, default="")
 
+    critical_strike  = models.PositiveIntegerField(default=0)
+    critical_strike_dmg_mod = models.PositiveIntegerField(default=0)
+    armor = models.PositiveIntegerField(default=0)
+    hp = models.PositiveIntegerField(default=0)
+    dmg1 = models.PositiveIntegerField(default=1)
+    dmg2 = models.PositiveIntegerField(default=1)
+    initiative = models.PositiveIntegerField(default=0)
+    hit_mod = models.PositiveIntegerField(default=0)
+
     def __str__(self):
         return self.name
 
@@ -31,6 +40,17 @@ class item_base(models.Model):
     item_base_pic = models.ImageField(
         default='0.png', upload_to='base_pics', blank=True)
     name = models.TextField(max_length=20, blank=False, default="")
+
+
+    critical_strike  = models.PositiveIntegerField(default=0)
+    critical_strike_dmg_mod = models.PositiveIntegerField(default=0)
+    armor = models.PositiveIntegerField(default=0)
+    hp = models.PositiveIntegerField(default=0)
+    dmg1 = models.PositiveIntegerField(default=1)
+    dmg2 = models.PositiveIntegerField(default=1)
+    initiative = models.PositiveIntegerField(default=0)
+    hit_mod = models.PositiveIntegerField(default=0)
+
 
     def __str__(self):
         return self.name
@@ -50,6 +70,17 @@ class item_sufix(models.Model):
         default='0.png', upload_to='sufix_pics', blank=True)
     name = models.TextField(max_length=20, blank=False, default="")
 
+
+    critical_strike  = models.PositiveIntegerField(default=0)
+    critical_strike_dmg_mod = models.PositiveIntegerField(default=0)
+    armor = models.PositiveIntegerField(default=0)
+    hp = models.PositiveIntegerField(default=0)
+    dmg1 = models.PositiveIntegerField(default=1)
+    dmg2 = models.PositiveIntegerField(default=1)
+    initiative = models.PositiveIntegerField(default=0)
+    hit_mod = models.PositiveIntegerField(default=0)
+
+    
     def __str__(self):
         return self.name
 
@@ -68,6 +99,8 @@ class Item(TimeStampedModel):
     base = models.ForeignKey(item_base, on_delete=models.CASCADE, related_name="items_with_that_base")
     prefix = models.ForeignKey(item_prefix, on_delete=models.CASCADE, related_name="items_with_that_prefix")
     sufix = models.ForeignKey(item_sufix, on_delete=models.CASCADE, related_name="items_with_that_sufix")
+
+    equipped = models.BooleanField(default=False)
 
     def __str__(self):
         if self.prefix.prefix_number == 0:

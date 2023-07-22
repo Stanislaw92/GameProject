@@ -5,13 +5,10 @@ from items.models import Item
 
 class ProfileSerializer(serializers.ModelSerializer):
     race = serializers.SerializerMethodField()
-    xp0 = serializers.StringRelatedField()
-    xp1 = serializers.StringRelatedField()
-    lvl = serializers.StringRelatedField()
 
     class Meta: 
         model = Profile
-        fields = ['name', 'race', 'id', 'xp0', 'xp1', 'lvl', 'uuid']
+        fields = ['name', 'race', 'id', 'xp0', 'xp1', 'lvl', 'uuid','stat1', 'stat2','stat3','stat4','stat5', 'equip_stat1', 'equip_stat2','equip_stat3','equip_stat4','equip_stat5']
         
     def get_race(self, instance):
         return instance.race.name
@@ -28,13 +25,15 @@ class ItemSerializer(serializers.ModelSerializer):
     sufix = serializers.SerializerMethodField()
     sufix_num = serializers.SerializerMethodField()
     itemType = serializers.StringRelatedField()
+    # equipped = serializers.StringRelatedField()
 
     class Meta:
         model = Item
-        exclude = ['updated_at']
+        fields = ['owner', 'name','item_type','base','base_num','prefix','prefix_num','sufix','sufix_num','itemType', 'equipped', 'id', 'uuid']
+
 
     def get_name(self, instance):
-        return '{} {} {}'.format(instance.prefix.name, instance.base.name, instance.sufix.name)
+        return '{} {} {} {}'.format(instance.itemType, instance.prefix.name, instance.base.name, instance.sufix.name)
 
     def get_base(self, instance):
         return instance.base.name

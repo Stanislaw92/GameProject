@@ -5,7 +5,7 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.permissions import  IsAdminUser
+from rest_framework.permissions import IsAdminUser
 
 
 from api.permissions import haveNoProfileYet, IsAuthorOrReadyOnly, IsOwner, isProfileOwnerOrReadyOnly
@@ -14,6 +14,7 @@ from profiles.models import Profile, Race
 from items.models import Item, item_prefix, item_base, item_sufix
 
 import random
+
 
 def itemRollFunction(pref_chance, suf_chance):
     bases = list(item_base.objects.all())
@@ -40,7 +41,7 @@ def itemRollFunction(pref_chance, suf_chance):
     else:
         pref_result = item_prefix.objects.get(prefix_number=0)
 
-    if random.randint(0,10000) > suf_chance:
+    if random.randint(0, 10000) > suf_chance:
         for idx, item in enumerate(sufixes):
             for i in range(idx*3):
                 list_for_suf_roll.append(item)
@@ -64,11 +65,27 @@ class ProfileListAPIView(generics.ListAPIView):
         request_user = self.request.user
         return Profile.objects.all().filter(profile_user=request_user).order_by("id")
 
+class AllProfilesListAPIView(generics.ListAPIView):
+    serializer_class = ProfileSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Profile.objects.all().order_by("-xp0")
+
 class ProfileRUDAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
     permission_classes = [IsAuthenticated, isProfileOwnerOrReadyOnly]
     lookup_field = 'uuid'
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data)
+
 
 class ProfileCreateAPIView(generics.CreateAPIView):
     queryset = Profile.objects.all()
@@ -79,7 +96,9 @@ class ProfileCreateAPIView(generics.CreateAPIView):
         kwarg_race = self.kwargs.get('race')
         request_user = self.request.user
         race = Race.objects.get(race_id=kwarg_race)
-        serializer.save(profile_user=request_user, xp0=0, xp1=100, lvl=1, race=race)
+        serializer.save(profile_user=request_user,
+                        xp0=0, xp1=100, lvl=1, race=race)
+
 
 class ItemListAPIView(generics.ListAPIView):
     serializer_class = ItemSerializer
@@ -87,7 +106,26 @@ class ItemListAPIView(generics.ListAPIView):
 
     def get_queryset(self):
         request_user = self.request.user
-        return Item.objects.all().filter(owner__profile_user = request_user).order_by('created_at')
+        return Item.objects.all().filter(owner__profile_user=request_user).order_by('created_at')
+
+
+class EquippedItemListAPIView(generics.ListAPIView):
+    serializer_class = ItemSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        request_user = self.request.user
+        return Item.objects.all().filter(owner__profile_user=request_user).filter(equipped=True).order_by('created_at')
+
+class UnEquippedItemListAPIView(generics.ListAPIView):
+    serializer_class = ItemSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        request_user = self.request.user
+        return Item.objects.all().filter(owner__profile_user=request_user).filter(equipped=False).order_by('created_at')
+
+
 
 class ItemRUDAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Item.objects.all()
@@ -102,9 +140,13 @@ class ItemCreateAPIView(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
-        [x,y,z] = itemRollFunction(5000,5000)
-        prefix = item_prefix.objects.get(item_type=1, prefix_number=x.prefix_number)
-        base = item_base.objects.get(item_type=1, item_base_number=y.item_base_number)
-        sufix = item_sufix.objects.get(item_type=1, sufix_number=z.sufix_number)
+        [x, y, z] = itemRollFunction(5000, 5000)
+        prefix = item_prefix.objects.get(
+            item_type=1, prefix_number=x.prefix_number)
+        base = item_base.objects.get(
+            item_type=1, item_base_number=y.item_base_number)
+        sufix = item_sufix.objects.get(
+            item_type=1, sufix_number=z.sufix_number)
         request_user = self.request.user
-        serializer.save(owner=request_user.profile, itemType=1, prefix=prefix, base=base, sufix=sufix)
+        serializer.save(owner=request_user.profile, itemType=1,
+                        prefix=prefix, base=base, sufix=sufix)

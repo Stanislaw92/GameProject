@@ -21,11 +21,25 @@ class Profile(models.Model):
     xp1 = models.PositiveBigIntegerField(default=100)
     lvl = models.PositiveSmallIntegerField(default=1)
 
+
+    #Each stat in this section need to have exact the same in item prefix, item base and item sufix models in ./items/models.py
     stat1 = models.PositiveIntegerField(default=0)
     stat2 = models.PositiveIntegerField(default=0)
     stat3 = models.PositiveIntegerField(default=0)
     stat4 = models.PositiveIntegerField(default=0)
     stat5 = models.PositiveIntegerField(default=0)
+
+
+    critical_strike  = models.PositiveIntegerField(default=0)
+    critical_strike_dmg_mod = models.PositiveIntegerField(default=0)
+    armor = models.PositiveIntegerField(default=0)
+    hp = models.PositiveIntegerField(default=0)
+    dmg1 = models.PositiveIntegerField(default=1)
+    dmg2 = models.PositiveIntegerField(default=1)
+    initiative = models.PositiveIntegerField(default=0)
+
+    hit_mod = models.PositiveIntegerField(default=0)
+    #////
 
     equip_stat1 = models.PositiveIntegerField(default=0)
     equip_stat2 = models.PositiveIntegerField(default=0)
@@ -37,12 +51,14 @@ class Profile(models.Model):
     def __str__(self):
         return "profile of a user: {}".format(self.name, self.profile_user.username)
 
-    def update_lvl(self):
-        if self.xp0 >= self.xp1:
+    def update_lvl(self, xp):
+        lvl = self.lvl
+        xp1 = self.xp1
+        print(xp1, type(xp1), xp, type(xp))
+        while xp > xp1:
             self.lvl_up()
-        if self.xp0 >= self.xp1:
-            self.update_lvl()
+        return lvl, xp1
 
     def lvl_up(self):
-        self.lvl += 1
-        self.xp1 = self.xp1 + self.xp1*19/18 
+        lvl += 1
+        xp1 = xp1 + xp1*19/18 
