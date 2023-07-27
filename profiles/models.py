@@ -21,7 +21,9 @@ class Profile(models.Model):
     xp1 = models.PositiveBigIntegerField(default=100)
     lvl = models.PositiveSmallIntegerField(default=1)
 
+    trips = models.PositiveSmallIntegerField(default=32, validators=[MinValueValidator(0), MaxValueValidator(32)])
 
+    
     #Each stat in this section need to have exact the same in item prefix, item base and item sufix models in ./items/models.py
     stat1 = models.PositiveIntegerField(default=0)
     stat2 = models.PositiveIntegerField(default=0)

@@ -9,11 +9,26 @@ from rest_framework.permissions import IsAdminUser
 
 
 from api.permissions import haveNoProfileYet, IsAuthorOrReadyOnly, IsOwner, isProfileOwnerOrReadyOnly
-from api.serializers import ProfileSerializer, ItemSerializer
+from api.serializers import ProfileSerializer, ItemSerializer, TripResultSerializer
 from profiles.models import Profile, Race
-from items.models import Item, item_prefix, item_base, item_sufix
+from items.models import Item, item_prefix, item_base, item_sufix, Trip_result
 
 import random
+
+def addXP(profile, xp_to_add):
+    profile.xp0 += xp_to_add
+
+    errorCounter = 0
+    while profile.xp0 > profile.xp1:
+        profile.lvl += 1
+        profile.xp0 = profile.xp0 - profile.xp1
+        profile.xp1 = round((profile.xp1*19/18), 0)
+        errorCounter += 1
+
+        if errorCounter >= 10:
+            break
+
+    profile.save()
 
 
 def itemRollFunction(pref_chance, suf_chance):
@@ -55,6 +70,57 @@ def itemRollFunction(pref_chance, suf_chance):
     suf = suf_result
 
     return [pref, base, suf]
+
+
+def Trip_results(user):
+    profile = user.profile
+    if random.randint(1, 101) < 50:
+        result_list = []
+        chance_for_drop = 150
+        percentage = chance_for_drop % 100
+        items_to_drop = (chance_for_drop - percentage) // 100
+
+        if random.randint(1, 101) < percentage:
+            items_to_drop += 1
+
+        result_list = result_list + DropItem(profile, items_to_drop)
+
+        trip_xp = random.choice(range(25,35))
+        addXP(profile, trip_xp)
+
+
+        return [True, result_list]
+
+    else:
+        return [False]
+
+
+
+def DropItem(profile, drops_number):
+    drop_list = []
+    for i in range(drops_number):
+        [x, y, z] = itemRollFunction(4000, 4000)
+
+        #if add another item types ( for now its only 1 ), uncomment this method 
+        # itemyTypeList = [1,2,3,4,5,6,7,8] #number of item types
+        # random.shuffle(itemyTypeList)
+        # item_type = random.choice(itemyTypeList)
+        
+        item_type = 1
+
+        prefix = item_prefix.objects.get(
+            item_type=item_type, prefix_number=x.prefix_number)
+        base = item_base.objects.get(
+            item_type=item_type, item_base_number=y.item_base_number)
+        sufix = item_sufix.objects.get(
+            item_type=item_type, sufix_number=z.sufix_number)
+
+        new_item = Item(owner=profile, itemType=item_type, prefix=prefix, base=base, sufix=sufix)
+        new_item.save()
+
+        drop_list.append(new_item)
+    
+    return drop_list
 
 
 class ProfileListAPIView(generics.ListAPIView):
@@ -150,3 +216,38 @@ class ItemCreateAPIView(generics.CreateAPIView):
         request_user = self.request.user
         serializer.save(owner=request_user.profile, itemType=1,
                         prefix=prefix, base=base, sufix=sufix)
+
+
+class TripResultAPIView(generics.CreateAPIView):
+    queryset = Trip_result.objects.all()
+    serializer_class = TripResultSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        request_user = self.request.user
+        result = Trip_results(request_user)
+        
+        if result[0]:
+            serializer.save(owner=request_user.profile, result=True, loot=result[1])
+        else:
+            serializer.save(owner=request_user.profile, result=False)
+
+
+
+
+class TripResultsListAPIView(generics.ListAPIView):
+    serializer_class = TripResultSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        request_user = self.request.user
+        return Trip_result.objects.all().filter(owner__profile_user=request_user).order_by('created_at')
+
+
+class TripResultRUDAPIView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Trip_result.objects.all()
+    serializer_class = TripResultSerializer
+    permission_classes = [IsAuthenticated, IsOwner]
+    lookup_field = 'uuid'
+
+

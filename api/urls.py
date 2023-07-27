@@ -5,14 +5,24 @@ from api import views as qv
 
 urlpatterns = [
     path("profiles/", qv.ProfileListAPIView.as_view(), name="profiles-list"),
-    path("all_profiles/", qv.AllProfilesListAPIView.as_view(), name="all-profiles-list"),
-    path("profiles/<uuid:uuid>/", qv.ProfileRUDAPIView.as_view(), name="profiles-detail"),
-    path("profiles/create/<int:race>/", qv.ProfileCreateAPIView.as_view(), name="profile-create"),
+    path("all_profiles/", qv.AllProfilesListAPIView.as_view(),
+         name="all-profiles-list"),
+    path("profiles/<uuid:uuid>/",
+         qv.ProfileRUDAPIView.as_view(), name="profiles-detail"),
+    path("profiles/create/<int:race>/",
+         qv.ProfileCreateAPIView.as_view(), name="profile-create"),
 
     path('items/', qv.ItemListAPIView.as_view(), name="items_list"),
-    path('eqippedItems/', qv.EquippedItemListAPIView.as_view(), name="equipped_items_list"),
-    path('unEqippedItems/', qv.UnEquippedItemListAPIView.as_view(), name="un_equipped_items_list"),
-    path("items/<uuid:uuid>/",qv.ItemRUDAPIView.as_view(), name='item-detail'),
-    path("items/create/",qv.ItemCreateAPIView.as_view(), name='item-create'),
+    path('eqippedItems/', qv.EquippedItemListAPIView.as_view(),
+         name="equipped_items_list"),
+    path('unEqippedItems/', qv.UnEquippedItemListAPIView.as_view(),
+         name="un_equipped_items_list"),
+    path("items/<uuid:uuid>/", qv.ItemRUDAPIView.as_view(), name='item-detail'),
+    path("items/create/", qv.ItemCreateAPIView.as_view(), name='item-create'),
+
+
+    path('trip_results/', qv.TripResultsListAPIView.as_view(), name="trip_results"),
+    path('trip_results/create/', qv.TripResultAPIView.as_view(), name="trip_result"),
+    path('trip_results/<uuid:uuid>/', qv.TripResultRUDAPIView.as_view(), name="trip_results_details/")
 
 ]

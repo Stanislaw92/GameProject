@@ -1,14 +1,14 @@
 from rest_framework import serializers
 
 from profiles.models import Profile
-from items.models import Item
+from items.models import Item, Trip_result
 
 class ProfileSerializer(serializers.ModelSerializer):
     race = serializers.SerializerMethodField()
 
     class Meta: 
         model = Profile
-        fields = ['name', 'race', 'id', 'xp0', 'xp1', 'lvl', 'uuid','stat1', 'stat2','stat3','stat4','stat5', 'equip_stat1', 'equip_stat2','equip_stat3','equip_stat4','equip_stat5']
+        fields = ['name', 'race', 'id', 'xp0', 'xp1', 'lvl', 'uuid','stat1', 'stat2','stat3','stat4','stat5', 'equip_stat1', 'equip_stat2','equip_stat3','equip_stat4','equip_stat5','trips']
         
     def get_race(self, instance):
         return instance.race.name
@@ -52,3 +52,12 @@ class ItemSerializer(serializers.ModelSerializer):
 
     def get_sufix_num(self, instance):
         return instance.sufix.sufix_number
+
+class TripResultSerializer(serializers.ModelSerializer):
+    owner = serializers.StringRelatedField()
+    loot = ItemSerializer(read_only=True, many=True)
+    result = serializers.StringRelatedField()
+
+    class Meta:
+        model = Trip_result
+        fields = ['owner', 'loot', 'result', 'uuid','created_at']

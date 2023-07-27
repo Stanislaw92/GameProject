@@ -114,3 +114,13 @@ class Item(TimeStampedModel):
         text = 'item: {} {} {}'.format(x, self.base, y)
         text = text.strip()
         return text
+
+
+class Trip_result(TimeStampedModel):
+    owner = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='trip_result')
+    loot = models.ManyToManyField(Item, blank=True)
+    result = models.BooleanField(default=False)
+    uuid = models.UUIDField(db_index=True, default=uuid_lib.uuid4,editable=False)
+
+    def __str__(self):
+        return 'trip no {}'.format(self.uuid)
