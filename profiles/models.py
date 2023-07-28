@@ -1,3 +1,4 @@
+from core.models import TimeStampedModel
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from users.models import CustomUser
@@ -64,3 +65,21 @@ class Profile(models.Model):
     def lvl_up(self):
         lvl += 1
         xp1 = xp1 + xp1*19/18 
+
+
+class TextMessage(TimeStampedModel):
+    uuid = models.UUIDField(db_index=True, default=uuid_lib.uuid4,editable=False)
+    sender = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='msg_sender')
+    reciever = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='msg_reciever')
+
+    owner = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='msg')
+
+    text = models.TextField(blank=False, max_length=400)
+    title = models.TextField(blank=False, max_length=40)
+
+    new = models.BooleanField(default=True)
+
+
+
+    class Meta:
+        ordering = ['-created_at']

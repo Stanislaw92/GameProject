@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from profiles.models import Profile
+from profiles.models import Profile, TextMessage
 from items.models import Item, Trip_result
 
 class ProfileSerializer(serializers.ModelSerializer):
@@ -53,6 +53,7 @@ class ItemSerializer(serializers.ModelSerializer):
     def get_sufix_num(self, instance):
         return instance.sufix.sufix_number
 
+
 class TripResultSerializer(serializers.ModelSerializer):
     owner = serializers.StringRelatedField()
     loot = ItemSerializer(read_only=True, many=True)
@@ -61,3 +62,35 @@ class TripResultSerializer(serializers.ModelSerializer):
     class Meta:
         model = Trip_result
         fields = ['owner', 'loot', 'result', 'uuid','created_at']
+
+
+class TextMessageSerializer(serializers.ModelSerializer):
+    sender = serializers.SerializerMethodField()
+    reciever = serializers.SerializerMethodField()
+
+    sender_uuid = serializers.SerializerMethodField()
+    reciever_uuid = serializers.SerializerMethodField()
+    # text = serializers.StringRelatedField()
+    # title = serializers.StringRelatedField()
+
+    owner = serializers.SerializerMethodField()
+    new = serializers.StringRelatedField()
+
+    def get_sender_uuid(self, instance):
+        return instance.sender.uuid
+
+    def get_reciever_uuid(self, instance):
+        return instance.reciever.uuid
+
+    def get_sender(self, instance):
+        return instance.sender.name
+
+    def get_reciever(self, instance):
+        return instance.reciever.name
+
+    def get_owner(self, instance):
+        return instance.owner.name
+
+    class Meta:
+        model = TextMessage
+        fields = ['sender', 'reciever','text', 'title','new', 'owner', 'uuid', 'reciever_uuid', 'sender_uuid']

@@ -9,8 +9,8 @@ from rest_framework.permissions import IsAdminUser
 
 
 from api.permissions import haveNoProfileYet, IsAuthorOrReadyOnly, IsOwner, isProfileOwnerOrReadyOnly
-from api.serializers import ProfileSerializer, ItemSerializer, TripResultSerializer
-from profiles.models import Profile, Race
+from api.serializers import ProfileSerializer, ItemSerializer, TripResultSerializer, TextMessageSerializer
+from profiles.models import Profile, Race, TextMessage
 from items.models import Item, item_prefix, item_base, item_sufix, Trip_result
 
 import random
@@ -233,8 +233,6 @@ class TripResultAPIView(generics.CreateAPIView):
             serializer.save(owner=request_user.profile, result=False)
 
 
-
-
 class TripResultsListAPIView(generics.ListAPIView):
     serializer_class = TripResultSerializer
     permission_classes = [IsAuthenticated]
@@ -251,3 +249,35 @@ class TripResultRUDAPIView(generics.RetrieveUpdateDestroyAPIView):
     lookup_field = 'uuid'
 
 
+
+class InboxTextMessagesListAPIView(generics.ListAPIView):
+    serializer_class = TextMessageSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        request_user = self.request.user
+        return TextMessage.objects.all().filter(reciever__profile_user=request_user).filter(owner__profile_user=request_user).order_by('created_at')
+
+class OutTextMessagesListAPIView(generics.ListAPIView):
+    serializer_class = TextMessageSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        request_user = self.request.user
+        return TextMessage.objects.all().filter(sender__profile_user=request_user).filter(owner__profile_user=request_user).order_by('created_at')
+
+
+class TextMessageCreateAPIView(generics.CreateAPIView):
+    queryset = TextMessage.objects.all()
+    serializer_class = TextMessageSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        request_user = self.request.user
+        serializer.save(sender=request_user.profile)
+
+class TextMessageRUDAPIView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = TextMessage.objects.all()
+    serializer_class = TextMessageSerializer
+    permission_classes = [IsAuthenticated, IsOwner]
+    lookup_field = 'uuid'

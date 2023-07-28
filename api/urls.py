@@ -4,6 +4,7 @@ from rest_framework.routers import DefaultRouter
 from api import views as qv
 
 urlpatterns = [
+
     path("profiles/", qv.ProfileListAPIView.as_view(), name="profiles-list"),
     path("all_profiles/", qv.AllProfilesListAPIView.as_view(),
          name="all-profiles-list"),
@@ -23,6 +24,12 @@ urlpatterns = [
 
     path('trip_results/', qv.TripResultsListAPIView.as_view(), name="trip_results"),
     path('trip_results/create/', qv.TripResultAPIView.as_view(), name="trip_result"),
-    path('trip_results/<uuid:uuid>/', qv.TripResultRUDAPIView.as_view(), name="trip_results_details/")
+    path('trip_results/<uuid:uuid>/', qv.TripResultRUDAPIView.as_view(), name="trip_results_details/"),
+
+    
+    path('txtmsg/inbox/', qv.InboxTextMessagesListAPIView.as_view(), name="text_messages_inbox_list"),
+    path('txtmsg/outbox/', qv.OutTextMessagesListAPIView.as_view(), name="text_messages_outbox_list"),
+    path('txtmsg/create/', qv.TextMessageCreateAPIView.as_view(), name="create_text_message"),
+    path('txtmsg/<uuid:uuid>/', qv.TextMessageRUDAPIView.as_view(), name="ruda_text_message"),
 
 ]
