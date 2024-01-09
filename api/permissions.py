@@ -24,4 +24,3 @@ class haveNoProfileYet(permissions.BasePermission):
         else:
             return True
 
-

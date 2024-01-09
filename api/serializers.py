@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from profiles.models import Profile, TextMessage
+from profiles.models import Profile, TextMessage, Combat1v1_result
 from items.models import Item, Trip_result
 
 class ProfileSerializer(serializers.ModelSerializer):
@@ -8,7 +8,7 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     class Meta: 
         model = Profile
-        fields = ['name', 'race', 'id', 'xp0', 'xp1', 'lvl', 'uuid','stat1', 'stat2','stat3','stat4','stat5', 'equip_stat1', 'equip_stat2','equip_stat3','equip_stat4','equip_stat5','trips']
+        fields = ['name', 'race', 'id', 'xp0', 'xp1', 'lvl', 'uuid','stat1', 'stat2','stat3','stat4','stat5', 'equip_stat1', 'equip_stat2','equip_stat3','equip_stat4','equip_stat5','trips', 'photo', 'training_points', 'trip_cooldown']
         
     def get_race(self, instance):
         return instance.race.name
@@ -56,41 +56,85 @@ class ItemSerializer(serializers.ModelSerializer):
 
 class TripResultSerializer(serializers.ModelSerializer):
     owner = serializers.StringRelatedField()
-    loot = ItemSerializer(read_only=True, many=True)
     result = serializers.StringRelatedField()
 
     class Meta:
         model = Trip_result
-        fields = ['owner', 'loot', 'result', 'uuid','created_at']
+        fields = ['owner', 'loot', 'result', 'uuid','created_at', 'new', 'saved']
 
 
 class TextMessageSerializer(serializers.ModelSerializer):
+    
     sender = serializers.SerializerMethodField()
     reciever = serializers.SerializerMethodField()
 
+    # saved = serializers.StringRelatedField()
     sender_uuid = serializers.SerializerMethodField()
-    reciever_uuid = serializers.SerializerMethodField()
+    reciever_uuid = serializers.StringRelatedField()
     # text = serializers.StringRelatedField()
     # title = serializers.StringRelatedField()
 
-    owner = serializers.SerializerMethodField()
-    new = serializers.StringRelatedField()
+    # owner = serializers.SerializerMethodField()
+    # new = serializers.StringRelatedField()
+
 
     def get_sender_uuid(self, instance):
-        return instance.sender.uuid
+        if instance.sender:
+            return instance.sender.uuid
+        else:
+            return "Raport"
 
     def get_reciever_uuid(self, instance):
         return instance.reciever.uuid
-
+ 
     def get_sender(self, instance):
-        return instance.sender.name
+        if instance.sender:
+            print(instance.sender)
+            return instance.sender.name
+        else:
+            return '----'
 
     def get_reciever(self, instance):
         return instance.reciever.name
 
-    def get_owner(self, instance):
-        return instance.owner.name
 
     class Meta:
         model = TextMessage
-        fields = ['sender', 'reciever','text', 'title','new', 'owner', 'uuid', 'reciever_uuid', 'sender_uuid']
+        fields = ['sender', 'reciever','text', 'title','new', 'deleted_sender', 'deleted_reciever', 'uuid', 'reciever_uuid', 'sender_uuid', 'saved', 'created_at']
+
+
+class Combat1v1ResultSerializer(serializers.ModelSerializer):
+    
+    attacker = serializers.SerializerMethodField()
+    victim = serializers.SerializerMethodField()
+
+    # saved = serializers.StringRelatedField()
+    attacker_uuid = serializers.SerializerMethodField()
+    victim_uuid = serializers.SerializerMethodField()
+    # text = serializers.StringRelatedField()
+    # title = serializers.StringRelatedField()
+    result = serializers.StringRelatedField()
+
+    winner = serializers.SerializerMethodField()
+    # new = serializers.StringRelatedField()
+
+
+    def get_attacker_uuid(self, instance):
+        return instance.attacker.uuid
+
+    def get_victim_uuid(self, instance):
+        return instance.victim.uuid
+
+    def get_attacker(self, instance):
+        return instance.attacker.name
+
+    def get_victim(self, instance):
+        return instance.victim.name
+
+
+    def get_winner(self, instance):
+        return instance.winner.name
+
+    class Meta:
+        model = Combat1v1_result
+        fields = ['attacker', 'victim','result', 'uuid', 'attacker_uuid', 'victim_uuid', 'winner', 'created_at', 'new', 'saved','deleted_sender', 'deleted_reciever']

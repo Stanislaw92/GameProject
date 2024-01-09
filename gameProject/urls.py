@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.conf import settings
 from django.urls import include, path, re_path
 from django_registration.backends.one_step.views import RegistrationView
 
@@ -6,6 +7,10 @@ from django.urls import reverse_lazy
 
 from core.views import IndexTemplateView
 from users.forms import CustomUserForm
+
+from django.views.static import serve
+
+
 
 
 urlpatterns = [
@@ -22,6 +27,11 @@ urlpatterns = [
 
     path('api/v1/', include('api.urls')),
 
-    re_path(r"^.*$", IndexTemplateView.as_view(), name="spa-entry-point")
+    re_path(r'^media/(?P<path>.*)$', serve, {
+        'document_root': settings.MEDIA_ROOT
+    }),
+
+    re_path(r"^.*$", IndexTemplateView.as_view(), name="spa-entry-point"),
+
 
 ]

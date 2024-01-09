@@ -32,11 +32,44 @@ class item_prefix(models.Model):
         verbose_name_plural = "prefixes"
 
 
+# itemTypes = {
+#     1: 'mainhand',
+#     2: 'offhand',
+#     3: 'chest',
+#     4: 'legs',
+#     5: 'rings',
+#     6: 'necklacle',
+#     7: 'head',
+#     8: 'shoes',
+# }
+
+# typeOfWeps = {
+#     0: 'not weapon',
+#     1: '1h meele',
+#     2: '2h meele',
+#     3: 'shield',
+#     4: '1h firearm',
+#     5: '2h firearm',
+#     6: 'ranged weapon',
+
+# }
+
+
+
 class item_base(models.Model):
     item_base_number = models.PositiveSmallIntegerField(
         default=0, null=False, validators=[MinValueValidator(0), MaxValueValidator(15)])
+
+
+    #Type of item depending of the slot in armory
     item_type = models.PositiveSmallIntegerField(default=0, blank=False, validators=[
                                                  MinValueValidator(0), MaxValueValidator(15)])
+
+
+    #type of weapon for example gun, 2h gun, meele wep, 2h meele wep etc, if= itemy_type != 1: type_of_wep=0
+    type_of_wep = models.PositiveSmallIntegerField(default=0, blank=False, validators=[
+                                                 MinValueValidator(0), MaxValueValidator(15)])
+    
     item_base_pic = models.ImageField(
         default='0.png', upload_to='base_pics', blank=True)
     name = models.TextField(max_length=20, blank=False, default="")
@@ -121,6 +154,8 @@ class Trip_result(TimeStampedModel):
     loot = models.ManyToManyField(Item, blank=True)
     result = models.BooleanField(default=False)
     uuid = models.UUIDField(db_index=True, default=uuid_lib.uuid4,editable=False)
+    new = models.BooleanField(default=True)
+    saved = models.BooleanField(default=False)
 
     def __str__(self):
         return 'trip no {}'.format(self.uuid)

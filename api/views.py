@@ -1,4 +1,9 @@
 from inspect import GEN_RUNNING
+from itertools import chain
+import time
+import random 
+
+from django.shortcuts import get_object_or_404
 from rest_framework import generics, status, viewsets
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
@@ -9,8 +14,8 @@ from rest_framework.permissions import IsAdminUser
 
 
 from api.permissions import haveNoProfileYet, IsAuthorOrReadyOnly, IsOwner, isProfileOwnerOrReadyOnly
-from api.serializers import ProfileSerializer, ItemSerializer, TripResultSerializer, TextMessageSerializer
-from profiles.models import Profile, Race, TextMessage
+from api.serializers import ProfileSerializer, ItemSerializer, TripResultSerializer, TextMessageSerializer, Combat1v1ResultSerializer
+from profiles.models import Profile, Race, TextMessage, Combat1v1_result
 from items.models import Item, item_prefix, item_base, item_sufix, Trip_result
 
 import random
@@ -29,7 +34,6 @@ def addXP(profile, xp_to_add):
             break
 
     profile.save()
-
 
 def itemRollFunction(pref_chance, suf_chance):
     bases = list(item_base.objects.all())
@@ -83,14 +87,12 @@ def Trip_results(user):
         if random.randint(1, 101) < percentage:
             items_to_drop += 1
 
-        result_list = result_list + DropItem(profile, items_to_drop)
+        result_list = DropItem(profile, items_to_drop)
 
         trip_xp = random.choice(range(25,35))
         addXP(profile, trip_xp)
 
-
         return [True, result_list]
-
     else:
         return [False]
 
@@ -249,6 +251,12 @@ class TripResultRUDAPIView(generics.RetrieveUpdateDestroyAPIView):
     lookup_field = 'uuid'
 
 
+class AllTextMessagesListAPIView(generics.ListAPIView):
+    serializer_class=TextMessageSerializer
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
+    def get_queryset(self):
+        return TextMessage.objects.all().order_by('-created_at')
 
 class InboxTextMessagesListAPIView(generics.ListAPIView):
     serializer_class = TextMessageSerializer
@@ -256,7 +264,8 @@ class InboxTextMessagesListAPIView(generics.ListAPIView):
 
     def get_queryset(self):
         request_user = self.request.user
-        return TextMessage.objects.all().filter(reciever__profile_user=request_user).filter(owner__profile_user=request_user).order_by('created_at')
+        return TextMessage.objects.all().filter(reciever__profile_user=request_user).filter(deleted_reciever=False).filter(saved=False).order_by('created_at')
+
 
 class OutTextMessagesListAPIView(generics.ListAPIView):
     serializer_class = TextMessageSerializer
@@ -264,7 +273,16 @@ class OutTextMessagesListAPIView(generics.ListAPIView):
 
     def get_queryset(self):
         request_user = self.request.user
-        return TextMessage.objects.all().filter(sender__profile_user=request_user).filter(owner__profile_user=request_user).order_by('created_at')
+        return TextMessage.objects.all().filter(sender__profile_user=request_user).filter(deleted_sender=False).order_by('created_at')
+
+
+class SavedTextMesageListAPIView(generics.ListAPIView):
+    serializer_class = TextMessageSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        request_user = self.request.user
+        return TextMessage.objects.all().filter(reciever__profile_user=request_user).filter(saved=True).filter(deleted_reciever=False).order_by('created_at')
 
 
 class TextMessageCreateAPIView(generics.CreateAPIView):
@@ -273,11 +291,145 @@ class TextMessageCreateAPIView(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
+        kwarg_reciever_uuid = self.kwargs.get('uuid')
+        reciever_profile = Profile.objects.get(uuid=kwarg_reciever_uuid)
         request_user = self.request.user
-        serializer.save(sender=request_user.profile)
+        serializer.save(sender=request_user.profile, saved=False, reciever=reciever_profile, deleted_sender=False, deleted_reciever=False, raport=False)
+
 
 class TextMessageRUDAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = TextMessage.objects.all()
     serializer_class = TextMessageSerializer
-    permission_classes = [IsAuthenticated, IsOwner]
+    permission_classes = [IsAuthenticated]
     lookup_field = 'uuid'
+
+
+
+
+def Combat1v1(attacker, opponent):
+
+    print(attacker.dmg1)
+    print(attacker.dmg2)
+    attack_order = 0
+
+    players = [attacker, opponent]
+
+    fight_text = []
+
+    player1_hp = attacker.hp
+    player2_hp = opponent.hp
+    rounds = 1
+
+    winner = None 
+
+    break_first_loop = False
+    while rounds < 11 and break_first_loop == False:
+
+        player1_attacks = attacker.attacks
+        player2_attacks = opponent.attacks
+
+        if attacker.initiative > opponent.initiative:
+            attack_order = 0
+        else:
+            attack_order = 1
+
+        #round loop
+        while player1_attacks > 0 or player2_attacks > 0:
+
+            if attack_order == 0:
+                victim_reductions = 0
+                dmg = random.randrange( players[0].dmg1, players[0].dmg2 + 1, 1 ) - victim_reductions
+
+                print('dmg', dmg)
+
+                fight_text.append('player {} attacks player {} with a weapon XXX for <b>{}</b>'.format(players[0], players[1], dmg))
+                
+                player1_attacks -= 1
+                print('attacker atttacks = ', player1_attacks)
+                player2_hp -= dmg
+
+                attack_order = 1
+                
+            else:
+                dmg = random.randrange( players[1].dmg1, players[1].dmg2+1, 1 )
+                fight_text.append('player {} attacks player {} with a weapon XXX for <b>{}<b>'.format(players[1], players[0], dmg))
+
+                player2_attacks -= 1
+                player1_hp -= dmg
+                print('opponent atttacks = ', player2_attacks)
+
+                attack_order = 0
+
+            if player1_hp <= 0:
+                winner = opponent
+                break_first_loop = True
+                break
+            elif player2_hp <= 0: 
+                winner = attacker
+                break_first_loop = True
+                break
+            elif player1_hp <= 0 and player2_hp <= 0:
+                winner = 'draw'
+                break_first_loop = True
+                break
+            
+        rounds += 1
+        fight_text.append('end of round')
+        # fight_text.append('--------------------------------------------------------------------')
+
+    
+    # if player1_hp <= 0 and player2_hp > 0:
+    #     fight_text.append('winner is player {}'.format(players[1].name))
+    # elif player2_hp <= 0 and player1_hp > 0:
+    #     fight_text.append('winner is player {}'.format(players[0].name))
+    # else:
+    #     fight_text.append('its a draw')
+
+    
+
+    return [winner, fight_text]
+    
+
+
+
+
+class Combat1v1ResultAPIView(generics.CreateAPIView):
+    queryset = Combat1v1_result.objects.all()
+    serializer_class = Combat1v1ResultSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        kwarg_victim_uuid = self.kwargs.get('uuid')
+
+        opponent_profile = get_object_or_404(Profile, uuid=kwarg_victim_uuid)
+        print('opponent_profile', opponent_profile)
+
+        request_user = self.request.user
+
+        [winner, result_text]  = Combat1v1(request_user.profile, opponent_profile)
+
+
+
+        serializer.save(result=result_text, attacker=request_user.profile, victim=opponent_profile, winner=winner)
+
+
+class Combat1v1ResultRUDAPIView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Combat1v1_result.objects.all()
+    serializer_class = Combat1v1ResultSerializer
+    permission_classes = [IsAuthenticated]
+    lookup_field = 'uuid'
+
+class Combat1v1ResultListAPIView(generics.ListAPIView):
+    serializer_class = Combat1v1ResultSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        request_user = self.request.user
+
+        offensive_array = Combat1v1_result.objects.all().filter(attacker=request_user.profile).order_by('created_at')
+
+        defensive_array = Combat1v1_result.objects.all().filter(victim=request_user.profile).order_by('created_at')
+
+        model_combination = list(chain(offensive_array, defensive_array))
+
+        return model_combination
