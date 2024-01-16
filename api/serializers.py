@@ -57,6 +57,16 @@ class ItemSerializer(serializers.ModelSerializer):
 class TripResultSerializer(serializers.ModelSerializer):
     owner = serializers.StringRelatedField()
     result = serializers.StringRelatedField()
+    loot = ItemSerializer(many=True, read_only=True)
+
+    # def create(self, validated_data):
+    #     loot_data = validated_data.pop('loot')
+    #     print(loot_data)
+    #     trip_result = Trip_result.objects.create(**validated_data)
+    #     for item in loot_data:
+    #         created_item = Item.objects.get_or_create(name=item)
+    #         trip_result.loot.add(created_item)
+        # return trip_result
 
     class Meta:
         model = Trip_result
