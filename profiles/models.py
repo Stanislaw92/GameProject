@@ -53,9 +53,19 @@ class Profile(models.Model):
     dmg2 = models.PositiveIntegerField(default=1)
     initiative = models.PositiveIntegerField(default=0)
     attacks = models.PositiveIntegerField(default=0)
-
     hit_mod = models.PositiveIntegerField(default=0)
-    # ////
+
+
+    equip_critical_strike = models.PositiveIntegerField(default=0)
+    equip_critical_strike_dmg_mod = models.PositiveIntegerField(default=0)
+    equip_armor = models.PositiveIntegerField(default=0)
+    equip_hp = models.PositiveIntegerField(default=0)
+    equip_dmg1 = models.PositiveIntegerField(default=0)
+    equip_dmg2 = models.PositiveIntegerField(default=0)
+    equip_initiative = models.PositiveIntegerField(default=0)
+    equip_attacks = models.PositiveIntegerField(default=0)
+    equip_hit_mod = models.PositiveIntegerField(default=0)
+
 
     equip_stat1 = models.PositiveIntegerField(default=0)
     equip_stat2 = models.PositiveIntegerField(default=0)

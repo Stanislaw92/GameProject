@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from profiles.models import Profile, TextMessage, Combat1v1_result
-from items.models import Item, Trip_result
+from items.models import Item, Trip_result, item_base, item_prefix, item_sufix
 
 class ProfileSerializer(serializers.ModelSerializer):
     race = serializers.SerializerMethodField()
@@ -14,41 +14,52 @@ class ProfileSerializer(serializers.ModelSerializer):
         return instance.race.name
 
 
+class itemBaseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = item_base
+        fields = '__all__'
+
+class itemPrefixSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = item_prefix
+        fields = '__all__'
+
+class itemSufixSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = item_sufix
+        fields = '__all__'
+
+
+
+
 class ItemSerializer(serializers.ModelSerializer):
     owner = serializers.StringRelatedField()
     name = serializers.SerializerMethodField()
     item_type = serializers.StringRelatedField()
-    base = serializers.SerializerMethodField()
+    # base = serializers.SerializerMethodField()
+    base = itemBaseSerializer()
     base_num = serializers.SerializerMethodField()
-    prefix = serializers.SerializerMethodField()
+    # prefix = serializers.SerializerMethodField()
+    prefix = itemPrefixSerializer()
     prefix_num = serializers.SerializerMethodField()
-    sufix = serializers.SerializerMethodField()
+    # sufix = serializers.SerializerMethodField()
+    sufix = itemSufixSerializer()
     sufix_num = serializers.SerializerMethodField()
     itemType = serializers.StringRelatedField()
     # equipped = serializers.StringRelatedField()
 
     class Meta:
         model = Item
-        fields = ['owner', 'name','item_type','base','base_num','prefix','prefix_num','sufix','sufix_num','itemType', 'equipped', 'id', 'uuid']
-
+        fields = '__all__'
 
     def get_name(self, instance):
         return '{} {} {} {}'.format(instance.itemType, instance.prefix.name, instance.base.name, instance.sufix.name)
 
-    def get_base(self, instance):
-        return instance.base.name
-
     def get_base_num(self, instance):
         return instance.base.item_base_number
 
-    def get_prefix(self, instance):
-        return instance.prefix.name
-
     def get_prefix_num(self, instance):
         return instance.prefix.prefix_number
-
-    def get_sufix(self, instance):
-        return instance.sufix.name
 
     def get_sufix_num(self, instance):
         return instance.sufix.sufix_number

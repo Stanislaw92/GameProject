@@ -13,6 +13,8 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAdminUser
 
 
+from django.http import JsonResponse
+
 from api.permissions import haveNoProfileYet, IsAuthorOrReadyOnly, IsOwner, isProfileOwnerOrReadyOnly
 from api.serializers import ProfileSerializer, ItemSerializer, TripResultSerializer, TextMessageSerializer, Combat1v1ResultSerializer
 from profiles.models import Profile, Race, TextMessage, Combat1v1_result
@@ -183,6 +185,9 @@ class EquippedItemListAPIView(generics.ListAPIView):
 
     def get_queryset(self):
         request_user = self.request.user
+
+        updateEquippedStats(request_user)
+
         return Item.objects.all().filter(owner__profile_user=request_user).filter(equipped=True).order_by('created_at')
 
 class UnEquippedItemListAPIView(generics.ListAPIView):
@@ -433,3 +438,75 @@ class Combat1v1ResultListAPIView(generics.ListAPIView):
         model_combination = list(chain(offensive_array, defensive_array))
 
         return model_combination
+
+
+
+def updateEquippedStats(user_object):
+    items = Item.objects.all().filter(owner__profile_user=user_object).filter(equipped=True).order_by('created_at')
+
+    user_profile = user_object.profile   
+
+    user_profile.equip_stat1 = 0
+    user_profile.equip_stat2 = 0
+    user_profile.equip_stat3 = 0
+    user_profile.equip_stat4 = 0
+    user_profile.equip_stat5 = 0
+    user_profile.equip_critical_strike = 0
+    user_profile.equip_critical_strike_dmg_mod = 0
+    user_profile.equip_armor = 0
+    user_profile.equip_hp = 0
+    user_profile.equip_dmg1 = 0
+    user_profile.equip_dmg2 = 0
+    user_profile.equip_initiative = 0
+    user_profile.equip_attacks = 0
+    user_profile.equip_hit_mod = 0
+
+    equip_stat1 = 0
+    equip_stat2 = 0
+    equip_stat3 = 0
+    equip_stat4 = 0
+    equip_stat5 = 0
+    equip_critical_strike = 0
+    equip_critical_strike_dmg_mod = 0
+    equip_armor = 0
+    equip_hp = 0
+    equip_dmg1 = 0
+    equip_dmg2 = 0
+    equip_initiative = 0
+    equip_attacks = 0
+    equip_hit_mod = 0
+
+
+    for item in items:
+            equip_stat1 += (item.prefix.stat1 + item.base.stat1 + item.sufix.stat1)
+            equip_stat2 += (item.prefix.stat2 + item.base.stat2 + item.sufix.stat2)
+            equip_stat3 += (item.prefix.stat3 + item.base.stat3 + item.sufix.stat3)
+            equip_stat4 += (item.prefix.stat4 + item.base.stat4 + item.sufix.stat4)
+            equip_stat5 += (item.prefix.stat5 + item.base.stat5 + item.sufix.stat5)
+            equip_critical_strike += (item.prefix.equip_critical_strike + item.base.equip_critical_strike + item.sufix.equip_critical_strike)
+            equip_critical_strike_dmg_mod += (item.prefix.equip_critical_strike_dmg_mod + item.base.equip_critical_strike_dmg_mod + item.sufix.equip_critical_strike_dmg_mod)
+            equip_armor+= (item.prefix.equip_armor + item.base.equip_armor + item.sufix.equip_armor)
+            equip_hp += (item.prefix.hp + item.base.hp + item.sufix.hp)
+            equip_dmg1 += (item.prefix.dmg1 + item.base.dmg1 + item.sufix.dmg1)
+            equip_dmg2 += (item.prefix.equip_dmg2 + item.base.equip_dmg2 + item.sufix.dmg2)
+            equip_initiative += (item.prefix.initiative + item.base.initiative + item.sufix.initiative)
+            equip_attacks += ( item.prefix.attacks + item.base.attacks + item.sufix.attacks)
+            equip_hit_mod += (item.prefix.equip_hit_mod + item.base.hit_mod + item.sufix.hit_mod)
+
+
+    user_profile.equip_stat1 = equip_stat1
+    user_profile.equip_stat2 = equip_stat2
+    user_profile.equip_stat3 = equip_stat3
+    user_profile.equip_stat4 = equip_stat4
+    user_profile.equip_stat5 = equip_stat5
+    user_profile.equip_critical_strike = equip_critical_strike
+    user_profile.equip_critical_strike_dmg_mod = equip_critical_strike_dmg_mod
+    user_profile.equip_armor = equip_armor
+    user_profile.equip_hp = equip_hp
+    user_profile.equip_dmg1 = equip_dmg1
+    user_profile.equip_dmg2 = equip_dmg2
+    user_profile.equip_initiative = equip_initiative
+    user_profile.equip_attacks = equip_attacks
+    user_profile.equip_hit_mod = equip_hit_mod
+
+    user_profile.save()

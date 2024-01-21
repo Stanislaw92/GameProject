@@ -22,6 +22,14 @@ class item_prefix(models.Model):
     dmg2 = models.PositiveIntegerField(default=1)
     initiative = models.PositiveIntegerField(default=0)
     hit_mod = models.PositiveIntegerField(default=0)
+    attacks = models.PositiveIntegerField(default=0)
+    
+    stat1 = models.PositiveIntegerField(default=0)
+    stat2 = models.PositiveIntegerField(default=0)
+    stat3 = models.PositiveIntegerField(default=0)
+    stat4 = models.PositiveIntegerField(default=0)
+    stat5 = models.PositiveIntegerField(default=0)
+
 
     def __str__(self):
         return self.name
@@ -29,7 +37,7 @@ class item_prefix(models.Model):
     class Meta:
         ordering = ['item_type', 'prefix_number']
         unique_together = ['prefix_number', 'item_type']
-        verbose_name_plural = "prefixes"
+        verbose_name_plural = "item prefixes"
 
 
 # itemTypes = {
@@ -83,7 +91,13 @@ class item_base(models.Model):
     dmg2 = models.PositiveIntegerField(default=1)
     initiative = models.PositiveIntegerField(default=0)
     hit_mod = models.PositiveIntegerField(default=0)
+    attacks = models.PositiveIntegerField(default=0)
 
+    stat1 = models.PositiveIntegerField(default=0)
+    stat2 = models.PositiveIntegerField(default=0)
+    stat3 = models.PositiveIntegerField(default=0)
+    stat4 = models.PositiveIntegerField(default=0)
+    stat5 = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return self.name
@@ -104,6 +118,12 @@ class item_sufix(models.Model):
     name = models.TextField(max_length=20, blank=False, default="")
 
 
+    stat1 = models.PositiveIntegerField(default=0)
+    stat2 = models.PositiveIntegerField(default=0)
+    stat3 = models.PositiveIntegerField(default=0)
+    stat4 = models.PositiveIntegerField(default=0)
+    stat5 = models.PositiveIntegerField(default=0)
+
     critical_strike  = models.PositiveIntegerField(default=0)
     critical_strike_dmg_mod = models.PositiveIntegerField(default=0)
     armor = models.PositiveIntegerField(default=0)
@@ -112,15 +132,15 @@ class item_sufix(models.Model):
     dmg2 = models.PositiveIntegerField(default=1)
     initiative = models.PositiveIntegerField(default=0)
     hit_mod = models.PositiveIntegerField(default=0)
-
+    attacks = models.PositiveIntegerField(default=0)
     
     def __str__(self):
         return self.name
 
-class Meta:
-        ordering = ['item_type', 'sufix_number']
-        unique_together = ['sufix_number', 'item_type']
-        verbose_name_plural = "sufixes"
+    class Meta:
+            ordering = ['item_type', 'sufix_number']
+            unique_together = ['sufix_number', 'item_type']
+            verbose_name_plural = "item sufixes"
 
 
 class Item(TimeStampedModel):
