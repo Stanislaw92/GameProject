@@ -41,4 +41,6 @@ urlpatterns = [
     path('combat_result/attack/<uuid:uuid>/', qv.Combat1v1ResultAPIView.as_view(), name="combat1v1_create_result"),
 
 
+    path('updatedPrefixes/', qv.addprefixes),
+
 ]

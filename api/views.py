@@ -483,15 +483,15 @@ def updateEquippedStats(user_object):
             equip_stat3 += (item.prefix.stat3 + item.base.stat3 + item.sufix.stat3)
             equip_stat4 += (item.prefix.stat4 + item.base.stat4 + item.sufix.stat4)
             equip_stat5 += (item.prefix.stat5 + item.base.stat5 + item.sufix.stat5)
-            equip_critical_strike += (item.prefix.equip_critical_strike + item.base.equip_critical_strike + item.sufix.equip_critical_strike)
-            equip_critical_strike_dmg_mod += (item.prefix.equip_critical_strike_dmg_mod + item.base.equip_critical_strike_dmg_mod + item.sufix.equip_critical_strike_dmg_mod)
-            equip_armor+= (item.prefix.equip_armor + item.base.equip_armor + item.sufix.equip_armor)
+            equip_critical_strike += (item.prefix.critical_strike + item.base.critical_strike + item.sufix.critical_strike)
+            equip_critical_strike_dmg_mod += (item.prefix.critical_strike_dmg_mod + item.base.critical_strike_dmg_mod + item.sufix.critical_strike_dmg_mod)
+            equip_armor+= (item.prefix.armor + item.base.armor + item.sufix.armor)
             equip_hp += (item.prefix.hp + item.base.hp + item.sufix.hp)
             equip_dmg1 += (item.prefix.dmg1 + item.base.dmg1 + item.sufix.dmg1)
-            equip_dmg2 += (item.prefix.equip_dmg2 + item.base.equip_dmg2 + item.sufix.dmg2)
+            equip_dmg2 += (item.prefix.dmg2 + item.base.dmg2 + item.sufix.dmg2)
             equip_initiative += (item.prefix.initiative + item.base.initiative + item.sufix.initiative)
             equip_attacks += ( item.prefix.attacks + item.base.attacks + item.sufix.attacks)
-            equip_hit_mod += (item.prefix.equip_hit_mod + item.base.hit_mod + item.sufix.hit_mod)
+            equip_hit_mod += (item.prefix.hit_mod + item.base.hit_mod + item.sufix.hit_mod)
 
 
     user_profile.equip_stat1 = equip_stat1
@@ -510,3 +510,38 @@ def updateEquippedStats(user_object):
     user_profile.equip_hit_mod = equip_hit_mod
 
     user_profile.save()
+
+
+
+#function to create prefixes, bases and sufixes for all item types in database
+def addprefixes(request):
+    for number in range(1,9):
+
+        if number == 1 or number == 2:
+
+            for y in range(1,7):
+                for x in range(1,11):
+                    base = item_base(item_base_number=x, item_type=number, name=x, type_of_wep=y)
+                    base.save()
+
+                    prefix = item_prefix(prefix_number=x, item_type=number, name=x, type_of_wep=y)
+                    prefix.save()
+
+                    sufix = item_sufix(sufix_number=x, item_type=number, name=x, type_of_wep=y)
+                    sufix.save()
+
+        else: 
+            for x in range(1,11):
+                base = item_base(item_base_number=x, item_type=number, name=x)
+                base.save()
+
+                prefix = item_prefix(prefix_number=x, item_type=number, name=x)
+                prefix.save()
+
+                sufix = item_sufix(sufix_number=x, item_type=number, name=x)
+                sufix.save()
+
+
+    context = {'result': 'success'}
+
+    return JsonResponse(context)
