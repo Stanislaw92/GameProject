@@ -206,6 +206,61 @@ class ItemRUDAPIView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated, IsOwner]
     lookup_field = 'uuid'
 
+class MultipleItemsUpdateAPIView(APIView):
+
+    def get_object(self, obj_uuid):
+        try:
+            return Item.objects.get(uuid=obj_uuid)
+        except (Item.DoesNotExist, ValidationError):
+            # raise status.HTTP_400_BAD_REQUEST
+            print("An exception has occurred!")
+
+    def validate_ids(self, uuid_list):
+        for uuid in uuid_list:
+            try:
+                Item.objects.get(uuid=uuid)
+            except (Item.DoesNotExist, ValidationError):
+                raise status.HTTP_400_BAD_REQUEST
+                # print("An exception has occurred!")
+        return True
+
+    def put(self, request, *args, **kwargs):
+        print(request.data)
+        uuid_list = request.data['uuids']
+        print(uuid_list)
+        equipped = request.data['equipped']
+        self.validate_ids(uuid_list=uuid_list)
+        instances = []
+        for uuid in uuid_list:
+            obj = self.get_object(obj_uuid=uuid)
+            obj.equipped = equipped
+            obj.save()
+            instances.append(obj)
+        serializer = ItemSerializer(instances, many=True)
+        return Response(serializer.data)
+
+
+class ItemsEditAPIView(APIView):
+    def get(self, request, pk, format=None):
+        obj = Item.objects.get(id=pk)
+        serializer = ItemSerializer(obj)
+        return Response(serializer.data, status.HTTP_200_OK)
+
+
+    def put(self, request, pk, format=None):
+        obj = Item.objects.get(id=pk)
+        serializer = ItemSerializer(obj, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status.HTTP_200_OK)
+        return Response(serializer.errors, status.HTTP_400_BAD_REQUEST)
+
+
+    def delete(self, request, pk, format=None):
+        obj = Item.objects.get(id=pk)
+        Item.delete(obj)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 class ItemCreateAPIView(generics.CreateAPIView):
     queryset = Item.objects.all()

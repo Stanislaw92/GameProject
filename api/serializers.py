@@ -65,6 +65,8 @@ class ItemSerializer(serializers.ModelSerializer):
         return instance.sufix.sufix_number
 
 
+
+
 class TripResultSerializer(serializers.ModelSerializer):
     owner = serializers.StringRelatedField()
     result = serializers.StringRelatedField()
