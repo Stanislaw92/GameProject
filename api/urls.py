@@ -45,5 +45,6 @@ urlpatterns = [
 
 
     path('updatedPrefixes/', qv.addprefixes),
+    path('updateRanking/', qv.updateRanking),
 
 ]

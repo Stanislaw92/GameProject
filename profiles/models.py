@@ -19,7 +19,7 @@ class Race(models.Model):
 
 class Profile(models.Model):
     photo = ResizedImageField(upload_to='uploads/',
-                              blank=True, size=[300, 300])
+                              blank=True, size=[900, 900])
 
     uuid = models.UUIDField(
         db_index=True, default=uuid_lib.uuid4, editable=False)
@@ -34,6 +34,8 @@ class Profile(models.Model):
     xp1 = models.PositiveBigIntegerField(default=100)
     lvl = models.PositiveSmallIntegerField(default=1)
     training_points = models.PositiveBigIntegerField(default=100)
+
+    ranking_place = models.PositiveSmallIntegerField(default=0)
 
     trips = models.PositiveSmallIntegerField(
         default=32, validators=[MinValueValidator(0), MaxValueValidator(32)])

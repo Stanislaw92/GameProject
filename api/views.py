@@ -228,6 +228,12 @@ class MultipleItemsUpdateAPIView(APIView):
         print(request.data)
         uuid_list = request.data['uuids']
         print(uuid_list)
+        for uuid in uuid_list:
+            print(uuid)
+            print(type(uuid))
+            if type(uuid) != str:
+                uuid_list.remove(uuid)
+        print(uuid_list)
         equipped = request.data['equipped']
         self.validate_ids(uuid_list=uuid_list)
         instances = []
@@ -599,4 +605,18 @@ def addprefixes(request):
 
     context = {'result': 'success'}
 
+    return JsonResponse(context)
+
+def updateRanking(request):
+    profiles = Profile.objects.all().order_by('-xp0')
+    context = {}
+    try :
+        for idx, profile in enumerate(profiles):
+            profile.ranking_place = idx + 1
+            profile.save()
+        context['success'] = True
+    except:
+        context['success'] = False
+        print("An exception occurred")
+    
     return JsonResponse(context)
