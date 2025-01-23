@@ -106,7 +106,7 @@ class item_base(models.Model):
     stat5 = models.PositiveIntegerField(default=0)
 
     def __str__(self):
-        if self.item_type == 1 or self.item_type == 2:
+        if self.item_type == 1:
             return itemTypes[self.item_type]+'({})'.format(self.item_type) + ' ' + typeOfWeps[self.type_of_wep]+'({})'.format(self.type_of_wep) + ' base: ' + self.name
         else:
             return itemTypes[self.item_type]+'({})'.format(self.item_type) + ' base: ' + self.name

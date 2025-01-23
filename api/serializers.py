@@ -47,13 +47,17 @@ class ItemSerializer(serializers.ModelSerializer):
     sufix_num = serializers.SerializerMethodField()
     itemType = serializers.StringRelatedField()
     # equipped = serializers.StringRelatedField()
+    overall_stats = serializers.SerializerMethodField()
 
     class Meta:
         model = Item
         fields = '__all__'
 
     def get_name(self, instance):
-        return '{} {} {} {}'.format(instance.itemType, instance.prefix.name, instance.base.name, instance.sufix.name)
+        if instance.itemType == 1:
+            return '{} {} {} {} {}'.format(instance.itemType, instance.base.type_of_wep, instance.prefix.name, instance.base.name, instance.sufix.name)
+        else:
+            return '{} {} {} {}'.format(instance.itemType, instance.prefix.name, instance.base.name, instance.sufix.name)
 
     def get_base_num(self, instance):
         return instance.base.item_base_number
@@ -63,6 +67,49 @@ class ItemSerializer(serializers.ModelSerializer):
 
     def get_sufix_num(self, instance):
         return instance.sufix.sufix_number
+    
+    def get_overall_stats(self, instance):
+        list_of_stats = []
+
+
+        dmg1_value = instance.prefix.dmg1 + instance.base.dmg1 + instance.sufix.dmg1
+        dmg2_value = instance.prefix.dmg2 + instance.base.dmg2 + instance.sufix.dmg2
+
+        if (instance.base.item_type == 1):
+            list_of_stats.append(['dmg', dmg1_value, dmg2_value])
+            # list_of_stats.append(['dmg2', dmg2_value])
+        elif (dmg1_value != 0 & dmg2_value != 0):
+            list_of_stats.append(['dmg', dmg1_value, dmg2_value])
+        elif (dmg1_value != 0 & dmg2_value == 0):
+            list_of_stats.append(['dmg', dmg1_value])
+        elif (dmg1_value == 0 & dmg2_value != 0):
+            list_of_stats.append(['dmg', 0, dmg2_value])
+             
+        
+
+        
+        
+        
+        stat1_value = instance.prefix.stat1 + instance.base.stat1 + instance.sufix.stat1
+        if  stat1_value != 0:
+            list_of_stats.append(['stat1', stat1_value])
+        stat2_value = instance.prefix.stat2 + instance.base.stat2 + instance.sufix.stat2
+        if  stat2_value != 0:
+            list_of_stats.append(['stat2', stat2_value])
+        stat3_value = instance.prefix.stat3 + instance.base.stat3 + instance.sufix.stat3
+        if  stat3_value != 0:
+            list_of_stats.append(['stat3', stat3_value])
+        stat4_value = instance.prefix.stat4 + instance.base.stat4 + instance.sufix.stat4
+        if  stat4_value != 0:
+            list_of_stats.append(['stat4', stat4_value])
+        stat5_value = instance.prefix.stat5 + instance.base.stat5 + instance.sufix.stat5
+        if  stat5_value != 0:
+            list_of_stats.append(['stat5', stat5_value])
+        
+
+
+        
+        return list_of_stats
 
 
 
