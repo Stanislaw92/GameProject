@@ -48,10 +48,10 @@ class item_prefix(models.Model):
 itemTypes = {
     0: 'None',
     1: 'mainhand',
-    2: 'offhand',
+    2: 'rings_1',
     3: 'chest',
     4: 'legs',
-    5: 'rings',
+    5: 'rings_2',
     6: 'necklacle',
     7: 'head',
     8: 'shoes',
@@ -87,7 +87,7 @@ class item_base(models.Model):
     item_base_pic = models.ImageField(
         default='0.png', upload_to='base_pics', blank=True)
     name = models.TextField(max_length=20, blank=False, default="")
-
+    is_two_handed = models.BooleanField(default=False)
 
     critical_strike  = models.PositiveIntegerField(default=0)
     critical_strike_dmg_mod = models.PositiveIntegerField(default=0)

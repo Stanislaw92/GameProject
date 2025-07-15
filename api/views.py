@@ -225,15 +225,15 @@ class MultipleItemsUpdateAPIView(APIView):
         return True
 
     def put(self, request, *args, **kwargs):
-        print(request.data)
+        # print(request.data)
         uuid_list = request.data['uuids']
-        print(uuid_list)
+        # print(uuid_list)
         for uuid in uuid_list:
-            print(uuid)
-            print(type(uuid))
+            # print(uuid)
+            # print(type(uuid))
             if type(uuid) != str:
                 uuid_list.remove(uuid)
-        print(uuid_list)
+        # print(uuid_list)
         equipped = request.data['equipped']
         self.validate_ids(uuid_list=uuid_list)
         instances = []
