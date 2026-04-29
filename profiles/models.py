@@ -150,3 +150,37 @@ class Combat1v1_result(TimeStampedModel):
 
     def __str__(self):
         return 'combat 1v1 no. {}'.format(self.uuid)
+
+
+class SpecialAttack(models.Model):
+    name = models.CharField(max_length=50)
+    description = models.TextField(blank=True)
+
+
+class Monster(models.Model):
+    photo = ResizedImageField(upload_to='uploads/',
+                              blank=True, size=[900, 900])
+    
+    uuid = models.UUIDField(
+        db_index=True, default=uuid_lib.uuid4, editable=False)
+    
+    name = models.TextField(max_length=20, blank=False, default='')
+    lvl = models.PositiveSmallIntegerField(default=1)
+
+    stat1 = models.PositiveIntegerField(default=0)
+    stat2 = models.PositiveIntegerField(default=0)
+    stat3 = models.PositiveIntegerField(default=0)
+    stat4 = models.PositiveIntegerField(default=0)
+    stat5 = models.PositiveIntegerField(default=0)
+
+    critical_strike = models.PositiveIntegerField(default=0)
+    critical_strike_dmg_mod = models.PositiveIntegerField(default=0)
+    armor = models.PositiveIntegerField(default=0)
+    hp = models.PositiveIntegerField(default=100)
+    dmg1 = models.PositiveIntegerField(default=1)
+    dmg2 = models.PositiveIntegerField(default=1)
+    initiative = models.PositiveIntegerField(default=0)
+    attacks = models.PositiveIntegerField(default=0)
+    hit_mod = models.PositiveIntegerField(default=0)
+
+    special_attacks = models.ManyToManyField(SpecialAttack, blank=True)
